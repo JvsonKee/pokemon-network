@@ -14,7 +14,7 @@ def scrape_episodes(driver):
     episodes = episode_list.find_elements(By.TAG_NAME, 'tr')
 
     for index, episode in enumerate(episodes, start=1):
-        if index == len(episodes):
+        if index == 1281:
             break
 
         if unwanted.__contains__(index):
@@ -31,14 +31,22 @@ def scrape_episodes(driver):
 # parses and cleans the necessary data of an episode
 # returns episode tuple containing episode number and title
 def parse_episode(episode, index):
-    number, title, season_number, season_title = (None, None, None, None)
+    number, title, season_number, season_title = (0, None, None, None)
 
     try:
-        number = episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{index}]/td[1]').text
+        str_number = episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{index}]/td[1]').text
 
-        if not number.isdigit(): return
+        if not str_number.isdigit(): return
+
+        number = int(str_number)
 
         title = episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{index}]/td[3]/a').text
+
+        if "A Sandshrew's Storm! An Ice Hole Double Battle!!" in title:
+            number = 1023
+
+        if "Connect to the Future! The Legend of the Blinding One!!" in title:
+            number = 1033
 
         season_number, season_title = get_season(int(number))
 
@@ -48,31 +56,7 @@ def parse_episode(episode, index):
     if index == 980:
         number = 943
 
-    return(number, title, season_number, season_title)
-
-# parses special double episodes
-# returns tuple of the first and second special episodes
-def parse_double_special_episode(f_episode, s_episode, f_index):
-    number, f_title, s_title = (None, None, None)
-    f_number, s_number = (None, None)
-
-    try:
-        number = f_episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{f_index}]/td[1]').text
-
-        f_number, s_number = (f'{number}:1', f'{number}:2')
-
-        f_title = f_episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{f_index}]/td[3]/a').text
-
-        s_title = s_episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[2]/tbody/tr[{f_index + 1}]/td[2]/a').text
-
-    except NoSuchElementException as error:
-        print(error)
-
-    first = (f_number, f_title)
-    second = (s_number, s_title)
-
-    return (first, second)
-
+    return(number + 10000, title, season_number, season_title)
 
 def get_season(episode_number):
     season_mapping = {
@@ -110,17 +94,56 @@ def get_season(episode_number):
     return (None, None)
 
 def scrape_pokemon(driver):
-    for i in range(1, 999):
-        id = i
+    edges = set()
 
-        if i > 999:
-            id = f'{i}'
+    try:
+        for pokemon_index in range(1, 1026):
+            id = get_id(pokemon_index)
 
-        if i < 100:
-            id = f'0{i}'
+            driver.get(f'https://www.serebii.net/anime/dex/{id}.shtml')
 
-        if i < 10:
-            id = f'00{i}'
+            main = driver.find_element(By.TAG_NAME, 'main')
 
-        print(id)
-        driver.get(f'https://www.serebii.net/anime/dex/{id}.shtml')
+            tables = main.find_elements(By.XPATH, './table')
+
+            # iterate through each table
+            for table_index, table in enumerate(tables, start = 3):
+                if table_index == len(tables): break
+
+                episodes = table.find_elements(By.XPATH, f'//*[@id="content"]/main/table[{table_index}]/tbody/tr')
+
+                for episode_index, episode in enumerate(episodes, start = 2):
+                    if episode_index == len(episodes): break
+
+                    episode_id = episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[{table_index}]/tbody/tr[{episode_index}]/td[1]').text
+
+                    if not episode_id.isdigit(): continue
+
+                    href = episode.find_element(By.XPATH, f'//*[@id="content"]/main/table[{table_index}]/tbody/tr[{episode_index}]/td[2]/a')
+                    href_value = href.get_attribute('href')
+
+                    if "pokemon2023" in href_value:
+                        continue
+
+                    edges.add((pokemon_index, int(episode_id) + 10000))
+
+        return edges
+
+    except NoSuchElementException as error:
+        print(error)
+
+# helper function to convert pokemon entry number to be used in url
+def get_id(index):
+    id = index
+
+    if index > 999:
+        id = f'{index}'
+
+    if index < 100:
+        id = f'0{index}'
+
+    if index < 10:
+        id = f'00{index}'
+
+    return id
+
