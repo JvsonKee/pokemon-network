@@ -8,13 +8,20 @@ def main():
     driver = webdriver.Chrome(options=options)
 
     print('Scraping...')
+
+    # scrape episodes
     episodes = util.scrape_episodes(driver)
+
+    episodes_df = pd.DataFrame(episodes, columns=['Id', 'Label', 'season_number', 'season_title'])
+    episodes_df.to_csv('../../datasets/clean/episode_list.csv', index=False)
+
+    # scrape for pokemon in each episode
+    edges = util.scrape_pokemon(driver)
+
+    edge_df = pd.DataFrame(list(edges), columns=['Source', 'Target'])
+    edge_df.to_csv('../../datasets/clean/edge_list.csv', index=False)
+
     print('\nScraping completed')
-
-    df = pd.DataFrame(episodes, columns=['episode_number', 'Title', 'season_number', 'season_title'])
-
-    df.index.name = 'id'
-    df.to_csv('../../datasets/clean/episode_list.csv')
 
 if __name__ == '__main__':
     main()
