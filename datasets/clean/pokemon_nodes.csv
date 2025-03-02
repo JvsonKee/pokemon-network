@@ -1,4 +1,4 @@
-Id,Label,rank,evolves_from,type1,type2
+id,name,rank,evolves_from,type1,type2
 1,bulbasaur,ordinary,-1,grass,poison
 2,ivysaur,ordinary,1,grass,poison
 3,venusaur,ordinary,2,grass,poison
