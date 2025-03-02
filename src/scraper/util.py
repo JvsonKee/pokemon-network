@@ -1,7 +1,6 @@
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 
-
 # scrapes episode list from serebii.net
 # returns array of parsed episodes
 def scrape_episodes(driver):
