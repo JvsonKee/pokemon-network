@@ -57,6 +57,7 @@ def parse_episode(episode, index):
 
     return(number + 10000, title, season_number, season_title)
 
+# helper function to get the season of an episode
 def get_season(episode_number):
     season_mapping = {
         1: {'episodes': range(1, 84), 'name': 'Indigo League'},
@@ -92,6 +93,8 @@ def get_season(episode_number):
 
     return (None, None)
 
+
+# create the edge list of pokemon in episodes
 def scrape_pokemon(driver):
     edges = set()
 
