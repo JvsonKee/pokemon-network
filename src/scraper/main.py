@@ -22,7 +22,7 @@ def main():
     edges = util.scrape_pokemon(driver)
 
     edge_df = pd.DataFrame(list(edges), columns=["Source", "Target"])
-    edge_df.to_csv("../../datasets/clean/edge_list.csv", index=False)
+    edge_df.to_csv("../../datasets/clean/edge_list.csv", index=False).astype("Int64")
 
     print("\nScraping completed")
 
