@@ -8,6 +8,12 @@ df = pd.read_csv(
 # remove last 119 pokemon paldea region
 df = df.iloc[:-120]
 
+# create node_type column
+df['node_type'] = 'pokemon'
+
+# capatalize the first letter of the pokemon name
+df['name'] = df['name'].str.capitalize()
+
 # renaming columns for gephi
 df = df.rename(columns={ 'id': 'Id', 'name': 'Label' })
 

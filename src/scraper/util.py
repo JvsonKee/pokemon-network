@@ -63,7 +63,7 @@ def parse_episode(episode, index):
     if index == 980:
         number = 943
 
-    return (number + 10000, title, season_number, season_title)
+    return (number + 10000, title, season_number, season_title, "episode")
 
 
 # helper function to get the season of an episode

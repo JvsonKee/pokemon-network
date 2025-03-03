@@ -14,7 +14,7 @@ def main():
     episodes = util.scrape_episodes(driver)
 
     episodes_df = pd.DataFrame(
-        episodes, columns=["Id", "Label", "season_number", "season_title"]
+        episodes, columns=["Id", "Label", "season_number", "season_title", "node_type"]
     )
     episodes_df.to_csv("../../datasets/clean/episode_nodes.csv", index=False)
 
