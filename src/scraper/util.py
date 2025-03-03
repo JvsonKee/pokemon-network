@@ -111,7 +111,6 @@ def scrape_pokemon(driver):
         for pokemon_index in range(1, 906):
             print(pokemon_index)
             id = get_id(pokemon_index)
-            count = 0
 
             driver.get(f"https://www.serebii.net/anime/dex/{id}.shtml")
 
@@ -150,10 +149,6 @@ def scrape_pokemon(driver):
                         continue
 
                     edges.add((pokemon_index, int(episode_id) + 10000))
-                    count += 1
-
-            if count == 0:
-                edges.add((pokemon_index, None))
 
         return edges
 
