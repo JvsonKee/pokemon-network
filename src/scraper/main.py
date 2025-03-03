@@ -16,7 +16,7 @@ def main():
     episodes_df = pd.DataFrame(
         episodes, columns=["Id", "Label", "season_number", "season_title"]
     )
-    episodes_df.to_csv("../../datasets/clean/episode_list.csv", index=False)
+    episodes_df.to_csv("../../datasets/clean/episode_nodes.csv", index=False)
 
     # scrape for pokemon in each episode
     edges = util.scrape_pokemon(driver)
