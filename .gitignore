@@ -3,5 +3,4 @@
 __pycache__
 .DS_Store
 .csv
-pokemon_projection_edges.csv
 .gephi
