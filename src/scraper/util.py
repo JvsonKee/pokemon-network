@@ -1,5 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
+import time
 
 
 # scrapes episode list from serebii.net
@@ -79,12 +81,24 @@ def get_season(episode_number):
         8: {"episodes": range(369, 422), "name": "Advanced Battle"},
         9: {"episodes": range(422, 469), "name": "Battle Frontier"},
         10: {"episodes": range(469, 521), "name": "Diamond and Pearl"},
-        11: {"episodes": range(521, 573), "name": "Diamond and Pearl: Battle Dimension"},
-        12: {"episodes": range(573, 626), "name": "Diamond and Pearl: Galactic Battles"},
-        13: {"episodes": range(626, 660),"name": "Diamond and Pearl: Sinnoh League Victors"},
+        11: {
+            "episodes": range(521, 573),
+            "name": "Diamond and Pearl: Battle Dimension",
+        },
+        12: {
+            "episodes": range(573, 626),
+            "name": "Diamond and Pearl: Galactic Battles",
+        },
+        13: {
+            "episodes": range(626, 660),
+            "name": "Diamond and Pearl: Sinnoh League Victors",
+        },
         14: {"episodes": range(660, 710), "name": "Black and White"},
         15: {"episodes": range(710, 759), "name": "Black and White: Rival Destinies"},
-        16: {"episodes": range(759, 804), "name": "Black and White: Adventures in Unova and Beyond"},
+        16: {
+            "episodes": range(759, 804),
+            "name": "Black and White: Adventures in Unova and Beyond",
+        },
         17: {"episodes": range(804, 853), "name": "XY"},
         18: {"episodes": range(853, 897), "name": "XY: Kalos Quest"},
         19: {"episodes": range(897, 944), "name": "XYZ"},
@@ -170,3 +184,62 @@ def get_id(index):
         id = f"00{index}"
 
     return id
+
+
+# scrape episode ratings from IMBD
+def scrape_ratings(driver):
+    ratings_list = []
+
+    for season_num in range(1, 26):
+        driver.get(
+            f"https://www.imdb.com/title/tt0168366/episodes/?season={season_num}&ref_=ttep"
+        )
+
+        episode_list = driver.find_element(
+            By.XPATH,
+            "/html/body/div[2]/main/div/section/div/section/div/div[1]/section[2]/section[2]",
+        )
+
+        episodes = episode_list.find_elements(By.TAG_NAME, "article")
+
+        last = episodes[len(episodes) - 1]
+
+        if "episode-item-wrapper" not in last.get_attribute("class"):
+            button = last.find_element(
+                By.XPATH,
+                f"/html/body/div[2]/main/div/section/div/section/div/div[1]/section[2]/section[2]/article[{len(episodes)}]/div/span[1]/button",
+            )
+
+            action = ActionChains(driver)
+            action.move_to_element(button).perform()
+
+            time.sleep(1)
+
+            button.click()
+
+            time.sleep(1)
+
+            episodes = episode_list.find_elements(By.TAG_NAME, "article")
+
+        for index, episode in enumerate(episodes, start=1):
+            episode_rating = parse_episode_rating(season_num, episode, index)
+            ratings_list.append(episode_rating)
+
+        time.sleep(1)
+
+    return ratings_list
+
+
+def parse_episode_rating(season_num, episode, index):
+    rating = None
+
+    try:
+        rating = episode.find_element(
+            By.XPATH,
+            f"/html/body/div[2]/main/div/section/div/section/div/div[1]/section[2]/section[2]/article[{index}]/div/div/div[3]/div[3]/div/span/span[1] | /html/body/div[2]/main/div/section/div/section/div/div[1]/section[2]/section[2]/article[{index}]/div/div/div[3]/div[4]/div/span/span[1]",
+        ).text
+    except NoSuchElementException:
+        rating = None
+
+    print(f"S{season_num}E{index}: {rating}")
+    return (season_num, index, rating)
